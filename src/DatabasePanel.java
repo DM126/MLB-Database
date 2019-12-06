@@ -15,7 +15,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-//TODO allow saving queries???
+//TODO REMOVE SAVED QUERY
 //TODO keep query history, add buttons to save, paste to execute box, remove. execute directly? copy to clipboard?
 //TODO CONCURRENCY CONTROL?
 //TODO LOG IN AS READONLY USER???
@@ -35,7 +35,8 @@ public class DatabasePanel extends JPanel
 	private JScrollPane tableScroll;
 	private QueryHistory<String> queryHistory;
 	private JButton saveQuery;
-	private DefaultListModel<String> savedQueries; //For the JList of saved queries
+	private JList<String> savedQueries;
+	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
 	private JTable table;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
 	
@@ -69,11 +70,11 @@ public class DatabasePanel extends JPanel
 			historyScroll.setViewportView(queryHistory);
 			
 			//Set up the list of saved queries
-			savedQueries = new DefaultListModel<String>();
-			JList<String> savedQueriesList = new JList<String>(savedQueries);
+			savedQueriesModel = new DefaultListModel<String>();
+			savedQueries = new JList<String>(savedQueriesModel);
 			JScrollPane savedQueriesScroll = new JScrollPane();
 			savedQueriesScroll.setPreferredSize(new Dimension(200, 300));
-			savedQueriesScroll.setViewportView(savedQueriesList);
+			savedQueriesScroll.setViewportView(savedQueries);
 			
 			loadSavedQueries();
 			
@@ -88,21 +89,26 @@ public class DatabasePanel extends JPanel
 			executeQuery = new JButton("Execute Query");
 			executeQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
 			
+			saveQuery = new JButton("Save Query");
+			saveQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
+			
 			createTableComboBox();
 			
 			//Add the action listener
 			EventListener listener = new EventListener();
 			tableSelect.addActionListener(listener);
 			executeQuery.addActionListener(listener);
+			saveQuery.addActionListener(listener);
 			queryHistory.addListSelectionListener(listener);
-			
+			savedQueries.addListSelectionListener(listener);
 			
 			//TODO FIGURE HOW TO NOT STRETCH ACROSS THE PANEL
 			JPanel optionsPanel = new JPanel();
 			//optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
 			//optionsPanel.add(Box.createHorizontalStrut(200));
-			optionsPanel.add(queryScroll);		
+			optionsPanel.add(queryScroll);
 			optionsPanel.add(executeQuery);
+			optionsPanel.add(saveQuery);
 			optionsPanel.add(new JLabel("History"));
 			optionsPanel.add(historyScroll);
 			optionsPanel.add(new JLabel("Saved queries"));
@@ -139,6 +145,7 @@ public class DatabasePanel extends JPanel
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 			
+			saveQuery.setEnabled(false);
 			showErrorMessage("Could not load saved queries:\n" + SAVED_QUERIES_FILE + " Could not be found.");
 		}
 	}
@@ -281,41 +288,6 @@ public class DatabasePanel extends JPanel
 		changesMade = false;
 		queryHistory.add(query);
 	}
-
-	/*
-	private class ButtonListener implements ActionListener
-	{
-		//Determines which button was clicked then calls the appropriate method.
-		public void actionPerformed(ActionEvent event) 
-		{
-			try
-			{
-				if (event.getSource() == updateTables)
-				{
-					if (changesMade)
-					{
-						//refreshTable(table, "people");
-						refreshTable(table, "SELECT * FROM people;");
-						//refreshTables(teamsTable, "Teams");
-						//refreshTables(gamesTable, "Games");
-					}
-					else
-					{
-						JOptionPane.showMessageDialog(DatabasePanel.this, "The tables are up to date.");
-					}
-				}
-			}
-			catch (SQLException ex)
-			{
-				//TODO DEBUG
-				System.out.println("SQLException: " + ex.getMessage());
-				ex.printStackTrace();
-				
-				showErrorMessage("TODO?");
-			}
-		}
-	}
-	*/
 	
 	/**
 	 * Displays a dialog box with an error message to the user then exit the program.
@@ -339,16 +311,23 @@ public class DatabasePanel extends JPanel
 		Scanner scan = new Scanner(savedQueriesFile);
 		while (scan.hasNext())
 		{
-			savedQueries.addElement(scan.nextLine());
+			savedQueriesModel.addElement(scan.nextLine());
 		}
 		
 		scan.close();
 	}
 	
+	/**
+	 * Saves the query currently in the text box.
+	 */
 	private void saveQuery()
 	{
-		//TODO FIX
-		System.out.println("query saved lol");
+		String query = queryText.getText();
+		
+		if (query.length() > 0)
+		{
+			
+		}
 	}
 	
 	private class EventListener implements ActionListener, ListSelectionListener
@@ -397,6 +376,10 @@ public class DatabasePanel extends JPanel
 			if (event.getSource() == queryHistory && !event.getValueIsAdjusting())
 			{
 				queryText.setText(queryHistory.getSelectedValue());
+			}
+			else if (event.getSource() == savedQueries && !event.getValueIsAdjusting())
+			{
+				//TODO???
 			}
 		}
 	}
