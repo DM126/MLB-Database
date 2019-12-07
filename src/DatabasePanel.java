@@ -118,7 +118,7 @@ public class DatabasePanel extends JPanel
 			
 			//setPreferredSize(new Dimension(tableScroll.getPreferredSize().width + 100, tableScroll.getPreferredSize().height + 100));
 		} 
-		catch (SQLException ex)// | IOException ex) 
+		catch (SQLException ex)
 		{
 			//TODO DEBUG
 			System.out.println(ex.getClass());
@@ -169,38 +169,13 @@ public class DatabasePanel extends JPanel
 		
 		tableSelect.setSelectedItem("people");
 	}
-	
-	/**
-	 * Reads an sql file and returns a list of statements.
-	 * 
-	 * @param filepath the path to the file to read
-	 * @return a list of statements to execute
-	 * @throws FileNotFoundException if the file could not be found
-	 *//*
-	public ArrayList<String> readFile(String filepath) throws FileNotFoundException
-	{
-		File sqlFile = new File(filepath);
-		Scanner scan = new Scanner(sqlFile, "Latin1");
-		scan.useDelimiter(";");
-		
-		//create a list of statements to execute
-		ArrayList<String> statements = new ArrayList<String>();
-		while (scan.hasNext())
-		{
-			statements.add(scan.next());
-		}
-		
-		scan.close();
-		
-		return statements;
-	}*/
-	
+
 	/**
 	 * Updates the JTables of the panel with data from the database.
 	 * 
 	 * @param table the JTable to update
 	 * @param query the query to execute
-	 */ //TODO CHANGE NAME?
+	 */
 	private void refreshTable(String query) throws SQLException
 	{
 		ResultSet rSet = stmt.executeQuery(query);
