@@ -15,10 +15,9 @@ public class DatabasePanel extends JPanel
 	private JComboBox<String> tableSelect; //Selects which table to display
 	private JTextArea queryText; //Where the user will enter a query
 	private JButton executeQuery;
-	private QueryHistory<String> queryHistory; //Stores the history for the current session
+	private UpdatableList<String> queryHistory; //Stores the history for the current session
 	private JButton saveQuery;
-	private JList<String> savedQueries;
-	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
+	private UpdatableList<String> savedQueries;
 	private JButton deleteQuery; //used for deleting saved queries
 	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
@@ -51,24 +50,22 @@ public class DatabasePanel extends JPanel
 			//TODO SEPARATE PANELS FOR THE JLISTS AND STUFF?
 			
 			//set up the query history list
-			queryHistory = new QueryHistory<String>();
+			queryHistory = new UpdatableList<String>(false);
 			JScrollPane historyScroll = new JScrollPane();
 			historyScroll.setPreferredSize(new Dimension(200, 300));
 			historyScroll.setViewportView(queryHistory);
 			
 			//Set up the list of saved queries
-			savedQueriesModel = new DefaultListModel<String>();
-			savedQueries = new JList<String>(savedQueriesModel);
-			savedQueries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			savedQueries = new UpdatableList<String>(true);
 			JScrollPane savedQueriesScroll = new JScrollPane();
 			savedQueriesScroll.setPreferredSize(new Dimension(200, 300));
 			savedQueriesScroll.setViewportView(savedQueries);
 			
-			querySaver = new QuerySaver(savedQueriesModel);
+			querySaver = new QuerySaver(savedQueries);
 			querySaver.loadSavedQueries();
 			
 			deleteQuery = new JButton("Delete query");
-			deleteQuery.setEnabled(!savedQueriesModel.isEmpty()); //enable the delete button if saved queries exist
+			deleteQuery.setEnabled(!savedQueries.isEmpty()); //enable the delete button if saved queries exist
 			
 			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
 			refreshTable("SELECT * FROM people;");
@@ -317,7 +314,7 @@ public class DatabasePanel extends JPanel
 					querySaver.deleteSavedQuery(savedQueries.getSelectedIndex());
 
 					//disable the delete button if there are no saved queries left
-					if (savedQueriesModel.isEmpty())
+					if (savedQueries.isEmpty())
 					{
 						deleteQuery.setEnabled(false);
 					}

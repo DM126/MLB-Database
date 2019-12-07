@@ -10,12 +10,11 @@ public class QuerySaver
 	public static final String SAVED_QUERIES_FILENAME = "savedqueries.txt";
 	
 	private File savedQueriesFile;
-	//TODO HAVE A REFERENCE TO THE TABLE ITSELF?
-	private DefaultListModel<String> savedQueriesModel; //The model for the list of saved queries
+	private UpdatableList<String> savedQueries; //The list of saved queries
 	
-	QuerySaver(DefaultListModel<String> savedQueriesModel)
+	QuerySaver(UpdatableList<String> savedQueries)
 	{
-		this.savedQueriesModel = savedQueriesModel;
+		this.savedQueries = savedQueries;
 	}
 	
 	/**
@@ -31,7 +30,7 @@ public class QuerySaver
 		Scanner scan = new Scanner(savedQueriesFile);
 		while (scan.hasNext())
 		{
-			savedQueriesModel.addElement(scan.nextLine());
+			savedQueries.add(scan.nextLine());
 		}
 		
 		scan.close();
@@ -46,23 +45,14 @@ public class QuerySaver
 	 */
 	public boolean saveQuery(String savedQuery) throws IOException
 	{	
-		//Find the correct sorted index for the new query to save
-		int index = 0;
-		while (index < savedQueriesModel.getSize() && savedQueriesModel.get(index).compareTo(savedQuery) < 0)
+		boolean wasAdded = savedQueries.add(savedQuery);
+		
+		if (wasAdded)
 		{
-			index++;
+			writeSavedQueriesToFile();
 		}
 		
-		//If index == size, query will be inserted at the end. Also don't insert duplicate queries.
-		if (index == savedQueriesModel.getSize() || !savedQueriesModel.get(index).equals(savedQuery))
-		{
-			savedQueriesModel.add(index, savedQuery);
-			writeSavedQueriesToFile();
-			
-			return true;
-		}
-
-		return false;
+		return wasAdded;
 	}
 	
 	/**
@@ -73,7 +63,7 @@ public class QuerySaver
 	 */
 	public void deleteSavedQuery(int selectedIndex) throws IOException
 	{
-		savedQueriesModel.remove(selectedIndex);
+		savedQueries.remove(selectedIndex);
 		
 		writeSavedQueriesToFile();
 	}
@@ -87,9 +77,10 @@ public class QuerySaver
 	{
 		PrintWriter printer = new PrintWriter(savedQueriesFile);
 		
-		for (int i = 0; i < savedQueriesModel.getSize(); i++)
+		DefaultListModel<String> listModel = savedQueries.getModel();
+		for (int i = 0; i < listModel.getSize(); i++)
 		{
-			printer.println(savedQueriesModel.get(i));
+			printer.println(listModel.get(i));
 		}
 		
 		printer.close();
