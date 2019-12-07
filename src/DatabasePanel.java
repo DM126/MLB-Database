@@ -37,6 +37,7 @@ public class DatabasePanel extends JPanel
 	private JList<String> savedQueries;
 	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
 	private JButton deleteQuery; //used for deleting saved queries
+	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
 	private File savedQueriesFile;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
@@ -56,6 +57,10 @@ public class DatabasePanel extends JPanel
 			//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			table.setEnabled(false);
+			
+			//For sorting the table by columns
+			tableSorter = new TableRowSorter<TableModel>();
+			table.setRowSorter(tableSorter);
 			
 			tableScroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			//tableScroll.setPreferredSize(new Dimension(1800, 800));
@@ -265,7 +270,7 @@ public class DatabasePanel extends JPanel
 	 * @param table the JTable to update
 	 * @param query the query to execute
 	 */ //TODO CHANGE NAME?
-	public void refreshTable(JTable table, String query) throws SQLException
+	private void refreshTable(JTable table, String query) throws SQLException
 	{
 		ResultSet rSet = stmt.executeQuery(query);
 		rsmd = rSet.getMetaData();
@@ -292,6 +297,8 @@ public class DatabasePanel extends JPanel
 		table.setModel(model);
 		changesMade = false;
 		queryHistory.add(query);
+		
+		tableSorter.setModel(model);
 	}
 	
 	/**
@@ -399,6 +406,11 @@ public class DatabasePanel extends JPanel
 		}
 	}
 	
+	/**
+	 * Writes the saved queries to the save file 
+	 * 
+	 * @throws FileNotFoundException if the file could not be found
+	 */
 	private void writeSavedQueriesToFile() throws FileNotFoundException
 	{
 		PrintWriter printer = new PrintWriter(savedQueriesFile);
