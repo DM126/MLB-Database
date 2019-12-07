@@ -14,12 +14,10 @@ public class DatabasePanel extends JPanel
 {	
 	private Connection conn = null;
 	private Statement stmt;
-	private ResultSetMetaData rsmd;
-	private JComboBox<String> tableSelect;
-	private JTextArea queryText;
+	private JComboBox<String> tableSelect; //Selects which table to display
+	private JTextArea queryText; //Where the user will enter a query
 	private JButton executeQuery;
-	private JScrollPane tableScroll;
-	private QueryHistory<String> queryHistory;
+	private QueryHistory<String> queryHistory; //Stores the history for the current session
 	private JButton saveQuery;
 	private JList<String> savedQueries;
 	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
@@ -27,8 +25,7 @@ public class DatabasePanel extends JPanel
 	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
 	private QuerySaver querySaver;
-	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
-	
+
 	/**
 	 * Sets up the panel by creating the components and  adding them to the 
 	 * panel.
@@ -49,7 +46,7 @@ public class DatabasePanel extends JPanel
 			tableSorter = new TableRowSorter<TableModel>();
 			table.setRowSorter(tableSorter);
 			
-			tableScroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			JScrollPane tableScroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			//tableScroll.setPreferredSize(new Dimension(1800, 800));
 			//tableScroll.setViewportView(table);
 			
@@ -76,7 +73,7 @@ public class DatabasePanel extends JPanel
 			deleteQuery.setEnabled(!savedQueriesModel.isEmpty()); //enable the delete button if saved queries exist
 			
 			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
-			refreshTable(table, "SELECT * FROM people;");
+			refreshTable("SELECT * FROM people;");
 			
 			queryText = new JTextArea();
 			queryText.setLineWrap(true);
@@ -209,13 +206,14 @@ public class DatabasePanel extends JPanel
 	 * @param table the JTable to update
 	 * @param query the query to execute
 	 */ //TODO CHANGE NAME?
-	private void refreshTable(JTable table, String query) throws SQLException
+	private void refreshTable(String query) throws SQLException
 	{
 		ResultSet rSet = stmt.executeQuery(query);
-		rsmd = rSet.getMetaData();
+		ResultSetMetaData rsmd = rSet.getMetaData();
 		int columns = rsmd.getColumnCount();
 		String[] columnInfo = new String[columns];
 		
+		//Get the header info
 		for (int i = 1; i <= columns; i++)
 		{
 			columnInfo[i - 1] = rsmd.getColumnName(i);
@@ -223,7 +221,7 @@ public class DatabasePanel extends JPanel
 		
 		DefaultTableModel model = new DefaultTableModel(columnInfo, 0);
 		
-		//will only execute if the ResultSet contains at least 1 entry
+		//Fill out the row information
 		while(rSet.next())
 		{
 			for (int i = 1; i <= columns; i++)
@@ -234,10 +232,9 @@ public class DatabasePanel extends JPanel
 		}
 		
 		table.setModel(model);
-		changesMade = false;
-		queryHistory.add(query);
-		
 		tableSorter.setModel(model);
+		
+		queryHistory.add(query);
 	}
 	
 	/**
@@ -262,7 +259,7 @@ public class DatabasePanel extends JPanel
 				{
 					try
 					{
-						refreshTable(table, queryText.getText());
+						refreshTable(queryText.getText());
 					}
 					catch (SQLException ex)
 					{
@@ -274,7 +271,7 @@ public class DatabasePanel extends JPanel
 			{
 				try
 				{
-					refreshTable(table, "SELECT * FROM " + (String)tableSelect.getSelectedItem() + ";");
+					refreshTable("SELECT * FROM " + (String)tableSelect.getSelectedItem() + ";");
 				}
 				catch (SQLException ex)
 				{
