@@ -38,6 +38,7 @@ public class DatabasePanel extends JPanel
 	private JButton saveQuery;
 	private JList<String> savedQueries;
 	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
+	private JButton deleteQuery; //used for deleting saved queries
 	private JTable table;
 	private File savedQueriesFile;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
@@ -74,9 +75,12 @@ public class DatabasePanel extends JPanel
 			//Set up the list of saved queries
 			savedQueriesModel = new DefaultListModel<String>();
 			savedQueries = new JList<String>(savedQueriesModel);
+			savedQueries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			JScrollPane savedQueriesScroll = new JScrollPane();
 			savedQueriesScroll.setPreferredSize(new Dimension(200, 300));
 			savedQueriesScroll.setViewportView(savedQueries);
+			
+			deleteQuery = new JButton("Delete query");
 			
 			loadSavedQueries();
 			
@@ -96,11 +100,12 @@ public class DatabasePanel extends JPanel
 			
 			createTableComboBox();
 			
-			//Add the action listener
+			//Add the event listeners
 			EventListener listener = new EventListener();
 			tableSelect.addActionListener(listener);
 			executeQuery.addActionListener(listener);
 			saveQuery.addActionListener(listener);
+			deleteQuery.addActionListener(listener);
 			queryHistory.addListSelectionListener(listener);
 			savedQueries.addListSelectionListener(listener);
 			
@@ -115,6 +120,7 @@ public class DatabasePanel extends JPanel
 			optionsPanel.add(historyScroll);
 			optionsPanel.add(new JLabel("Saved queries"));
 			optionsPanel.add(savedQueriesScroll);
+			optionsPanel.add(deleteQuery);
 			optionsPanel.add(new JLabel("Select a table:"));
 			optionsPanel.add(tableSelect);
 			
@@ -317,6 +323,9 @@ public class DatabasePanel extends JPanel
 		}
 		
 		scan.close();
+		
+		//enable the delete button if saved queries exist
+		deleteQuery.setEnabled(!savedQueriesModel.isEmpty());
 	}
 	
 	/**
@@ -339,18 +348,11 @@ public class DatabasePanel extends JPanel
 			if (index == savedQueriesModel.getSize() || !savedQueriesModel.get(index).equals(savedQuery))
 			{
 				savedQueriesModel.add(index, savedQuery);
-				
+				deleteQuery.setEnabled(true);
 				//Write the queries to the file
 				try
 				{
-					PrintWriter printer = new PrintWriter(savedQueriesFile);
-					
-					for (int i = 0; i < savedQueriesModel.getSize(); i++)
-					{
-						printer.println(savedQueriesModel.get(i));
-					}
-					
-					printer.close();
+					writeSavedQueriesToFile();
 				}
 				catch (IOException ex)
 				{
@@ -370,6 +372,46 @@ public class DatabasePanel extends JPanel
 		{
 			showErrorMessage("Query must not be empty.");
 		}
+	}
+	
+	/**
+	 * Deletes the currently selected saved query
+	 */
+	private void deleteSavedQuery()
+	{
+		savedQueriesModel.remove(savedQueries.getSelectedIndex());
+		
+		//disable the delete button if there are no saved queries
+		if (savedQueriesModel.isEmpty())
+		{
+			deleteQuery.setEnabled(false);
+		}
+		
+		//Update the save file
+		try
+		{
+			writeSavedQueriesToFile();
+		}
+		catch (IOException ex)
+		{
+			//TODO DEBUG
+			ex.printStackTrace();
+			
+			showErrorMessage("The query could not be deleted.");
+			saveQuery.setEnabled(false);
+		}
+	}
+	
+	private void writeSavedQueriesToFile() throws FileNotFoundException
+	{
+		PrintWriter printer = new PrintWriter(savedQueriesFile);
+		
+		for (int i = 0; i < savedQueriesModel.getSize(); i++)
+		{
+			printer.println(savedQueriesModel.get(i));
+		}
+		
+		printer.close();
 	}
 	
 	private class EventListener implements ActionListener, ListSelectionListener
@@ -410,6 +452,10 @@ public class DatabasePanel extends JPanel
 			{
 				saveQuery();
 			}
+			else if (event.getSource() == deleteQuery)
+			{
+				deleteSavedQuery();
+			}
 		}
 
 		@Override
@@ -421,7 +467,7 @@ public class DatabasePanel extends JPanel
 			}
 			else if (event.getSource() == savedQueries && !event.getValueIsAdjusting())
 			{
-				//TODO???
+				queryText.setText(savedQueries.getSelectedValue());
 			}
 		}
 	}
