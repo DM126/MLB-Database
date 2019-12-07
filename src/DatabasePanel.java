@@ -27,9 +27,7 @@ public class DatabasePanel extends JPanel
 	
 	private Connection conn = null;
 	private Statement stmt;
-	private ResultSet rSet;
 	private ResultSetMetaData rsmd;
-	//private JButton updateTables;
 	private JComboBox<String> tableSelect;
 	private JTextArea queryText;
 	private JButton executeQuery;
@@ -43,21 +41,20 @@ public class DatabasePanel extends JPanel
 	private File savedQueriesFile;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
 	
-	//---------------------------------------------------------------------
-	// Constructor. Sets up the panel by creating the components and 
-	// adding them to the panel.
-	//---------------------------------------------------------------------
+	/**
+	 * Sets up the panel by creating the components and  adding them to the 
+	 * panel.
+	 */
 	public DatabasePanel()
 	{
 		try
 		{
 			connectToDatabase();
 			
-			//updateTables = new JButton("Update tables");
-			
 			table = new JTable();
 			//table.setPreferredSize(new Dimension(2000, 1000));
-			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			table.setEnabled(false);
 			
 			tableScroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -270,7 +267,7 @@ public class DatabasePanel extends JPanel
 	 */ //TODO CHANGE NAME?
 	public void refreshTable(JTable table, String query) throws SQLException
 	{
-		rSet = stmt.executeQuery(query);
+		ResultSet rSet = stmt.executeQuery(query);
 		rsmd = rSet.getMetaData();
 		int columns = rsmd.getColumnCount();
 		String[] columnInfo = new String[columns];
