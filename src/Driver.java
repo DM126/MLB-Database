@@ -3,9 +3,9 @@ import javax.swing.*;
 
 public class Driver
 {
-	//---------------------------------------------------------------------
-	// Creates the frame of the GUI and a DatabasePanel
-	//---------------------------------------------------------------------
+	/**
+	 * Creates the frame of the GUI and a DatabasePanel
+	 */
 	public static void main(String[] args)
 	{
 		//TODO CREATE FRAME CLASS??
@@ -15,6 +15,5 @@ public class Driver
 		frame.getContentPane().add(new DatabasePanel(), BorderLayout.CENTER);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
-		//frame.pack();
 	}
 }
