@@ -1,24 +1,13 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
-import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Scanner;
 
-//TODO REMOVE SAVED QUERY
-//TODO keep query history, add buttons to save, paste to execute box, remove. execute directly? copy to clipboard?
-//TODO CONCURRENCY CONTROL?
 //TODO LOG IN AS READONLY USER???
 
 public class DatabasePanel extends JPanel
@@ -134,7 +123,6 @@ public class DatabasePanel extends JPanel
 			setLayout(new BorderLayout());
 			add(optionsPanel, BorderLayout.NORTH);
 			add(tableScroll, BorderLayout.CENTER);
-//			add(updateTables);
 			
 			//setPreferredSize(new Dimension(tableScroll.getPreferredSize().width + 100, tableScroll.getPreferredSize().height + 100));
 		} 
@@ -161,64 +149,15 @@ public class DatabasePanel extends JPanel
 	}
 
 	/**
-	 * Connects the program to the SQL database and creates the tables to 
-	 * hold data on teams and games.
-	 * @throws IOException 
+	 * Connects the program to the database.
+	 * 
+	 * @throws SQLException if the database could not be connected to 
 	 */
 	private void connectToDatabase() throws SQLException//, IOException
-	{
-		//TODO REFACTOR TEMP CONNECTION?
-//		conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/", "postgres", "password");
-//		boolean createdDatabase = false;
-//		
-//		if (conn != null)
-//		{
-//			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//			ResultSet rset = stmt.executeQuery("SELECT * FROM pg_database WHERE datname = 'stats';");
-//			if (!rset.next()) //if db does not exist, create it.
-//			{
-//				//TODO CREATE MAIN MENU TO DISPLAY DIALOG BOX WHEN DB IS BEING CREATED?	
-//				System.out.println("creating db..."); //TODO REMOVE PRINT STATEMENTS
-//				stmt.executeUpdate("CREATE DATABASE mlbtest;");
-//				createdDatabase = true;
-//			}
-//			
-//			stmt.close();
-//			conn.close();
-			
+	{		
 			conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/stats?user=postgres&password=password&useSSL=false");
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//			
-//			if (createdDatabase)
-//			{
-//				createTables();
-//				System.out.println("created tables");
-//			}
-//		}
 	}
-	
-	/**
-	 * Executes the statements found in the sql file to create the tables.
-	 * 
-	 * @throws SQLException if there was an error executing the statements
-	 * @throws IOException 
-	 *//*
-	private void createTables() throws SQLException, IOException
-	{
-		ArrayList<String> buildStatements = readFile("core" + File.separator + "_createtables.sql");
-		for (String statement : buildStatements)
-		{
-			stmt.execute(statement);
-		}
-		
-		CopyManager cm = new CopyManager((BaseConnection) conn);
-		long rowsInserted = cm.copyIn(
-	                "COPY people(player_id, birth_year, birth_month, birth_day, birth_country, birth_state, birth_city, death_year, death_month, death_day, death_country, death_state, death_city, name_first, name_last, name_given, weight, height, bats, throws, debut, final_game, retro_id, bbref_id) FROM STDIN (FORMAT csv, HEADER)", 
-	                new BufferedReader(new FileReader("C:\\Users\\Danny\\workspace\\DBMSProject\\core\\People.csv"))
-	                );
-		//COPY people(player_id, birth_year, birth_month, birth_day, birth_country, birth_state, birth_city, death_year, death_month, death_day, death_country, death_state, death_city, name_first, name_last, name_given, weight, height, bats, throws, debut, final_game, retro_id, bbref_id) FROM 'C:\Users\Danny\workspace\DBMSProject\core\People.csv' DELIMITER ',' CSV HEADER;
-		System.out.printf("%d row(s) inserted%n", rowsInserted);
-	}*/
 	
 	/**
 	 * Creates the combobox where tables can be selected.
