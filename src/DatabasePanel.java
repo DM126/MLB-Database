@@ -27,11 +27,13 @@ public class DatabasePanel extends JPanel
 	 * Sets up the panel by creating the components and  adding them to the 
 	 * panel.
 	 */
-	public DatabasePanel()
+	public DatabasePanel(Connection conn)
 	{
 		try
 		{
-			connectToDatabase();
+			//connectToDatabase();
+			this.conn = conn;
+			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			
 			table = new JTable();
 			//table.setPreferredSize(new Dimension(2000, 1000));
@@ -125,7 +127,7 @@ public class DatabasePanel extends JPanel
 			System.out.println(ex.getMessage());
 			ex.printStackTrace();
 			
-			showErrorMessage("An error was encountered while trying to create the database.");
+			showErrorMessage("An error was encountered while trying to connect to the database.");
 			System.exit(1);
 		}
 		catch (FileNotFoundException ex)
