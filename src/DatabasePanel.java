@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -22,7 +23,7 @@ import java.util.Scanner;
 
 public class DatabasePanel extends JPanel
 {
-	private static final String SAVED_QUERIES_FILE = "savedqueries.txt";
+	private static final String SAVED_QUERIES_FILENAME = "savedqueries.txt";
 	
 	private Connection conn = null;
 	private Statement stmt;
@@ -38,6 +39,7 @@ public class DatabasePanel extends JPanel
 	private JList<String> savedQueries;
 	private DefaultListModel<String> savedQueriesModel; //For the JList of saved queries
 	private JTable table;
+	private File savedQueriesFile;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
 	
 	//---------------------------------------------------------------------
@@ -146,7 +148,7 @@ public class DatabasePanel extends JPanel
 			ex.printStackTrace();
 			
 			saveQuery.setEnabled(false);
-			showErrorMessage("Could not load saved queries:\n" + SAVED_QUERIES_FILE + " Could not be found.");
+			showErrorMessage("Could not load saved queries:\n" + SAVED_QUERIES_FILENAME + " Could not be found.");
 		}
 	}
 
@@ -307,7 +309,7 @@ public class DatabasePanel extends JPanel
 	 */
 	private void loadSavedQueries() throws FileNotFoundException
 	{
-		File savedQueriesFile = new File(SAVED_QUERIES_FILE);
+		savedQueriesFile = new File(SAVED_QUERIES_FILENAME);
 		Scanner scan = new Scanner(savedQueriesFile);
 		while (scan.hasNext())
 		{
@@ -322,11 +324,51 @@ public class DatabasePanel extends JPanel
 	 */
 	private void saveQuery()
 	{
-		String query = queryText.getText();
+		String savedQuery = queryText.getText();
 		
-		if (query.length() > 0)
+		if (savedQuery.length() > 0)
 		{
+			//Find the correct sorted index for the new query to save
+			int index = 0;
+			while (index < savedQueriesModel.getSize() && savedQueriesModel.get(index).compareTo(savedQuery) < 0)
+			{
+				index++;
+			}
 			
+			//If index == size, query will be inserted at the end. Also don't insert duplicate queries.
+			if (index == savedQueriesModel.getSize() || !savedQueriesModel.get(index).equals(savedQuery))
+			{
+				savedQueriesModel.add(index, savedQuery);
+				
+				//Write the queries to the file
+				try
+				{
+					PrintWriter printer = new PrintWriter(savedQueriesFile);
+					
+					for (int i = 0; i < savedQueriesModel.getSize(); i++)
+					{
+						printer.println(savedQueriesModel.get(i));
+					}
+					
+					printer.close();
+				}
+				catch (IOException ex)
+				{
+					//TODO DEBUG
+					ex.printStackTrace();
+					
+					showErrorMessage("The query could not be saved.");
+					saveQuery.setEnabled(false);
+				}
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(this, "This query has already been saved.", "Save query", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+		else
+		{
+			showErrorMessage("Query must not be empty.");
 		}
 	}
 	
