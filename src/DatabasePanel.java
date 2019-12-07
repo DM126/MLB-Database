@@ -22,9 +22,7 @@ import java.util.Scanner;
 //TODO LOG IN AS READONLY USER???
 
 public class DatabasePanel extends JPanel
-{
-	private static final String SAVED_QUERIES_FILENAME = "savedqueries.txt";
-	
+{	
 	private Connection conn = null;
 	private Statement stmt;
 	private ResultSetMetaData rsmd;
@@ -39,7 +37,7 @@ public class DatabasePanel extends JPanel
 	private JButton deleteQuery; //used for deleting saved queries
 	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
-	private File savedQueriesFile;
+	private QuerySaver querySaver;
 	private boolean changesMade = false; //determines if any changes have been made since the last table update TODO CONCURRENCY CONTROL
 	
 	/**
@@ -82,9 +80,11 @@ public class DatabasePanel extends JPanel
 			savedQueriesScroll.setPreferredSize(new Dimension(200, 300));
 			savedQueriesScroll.setViewportView(savedQueries);
 			
-			deleteQuery = new JButton("Delete query");
+			querySaver = new QuerySaver(savedQueriesModel);
+			querySaver.loadSavedQueries();
 			
-			loadSavedQueries();
+			deleteQuery = new JButton("Delete query");
+			deleteQuery.setEnabled(!savedQueriesModel.isEmpty()); //enable the delete button if saved queries exist
 			
 			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
 			refreshTable(table, "SELECT * FROM people;");
@@ -156,7 +156,7 @@ public class DatabasePanel extends JPanel
 			ex.printStackTrace();
 			
 			saveQuery.setEnabled(false);
-			showErrorMessage("Could not load saved queries:\n" + SAVED_QUERIES_FILENAME + " Could not be found.");
+			showErrorMessage("Could not load saved queries:\n" + QuerySaver.SAVED_QUERIES_FILENAME + " Could not be found.");
 		}
 	}
 
@@ -312,117 +312,6 @@ public class DatabasePanel extends JPanel
 		//System.exit(1);
 	}
 	
-	/**
-	 * Loads the saved queries from a text file upon starting the application.
-	 * 
-	 * @throws FileNotFoundException if savedqueries.txt could not be found
-	 */
-	private void loadSavedQueries() throws FileNotFoundException
-	{
-		savedQueriesFile = new File(SAVED_QUERIES_FILENAME);
-		Scanner scan = new Scanner(savedQueriesFile);
-		while (scan.hasNext())
-		{
-			savedQueriesModel.addElement(scan.nextLine());
-		}
-		
-		scan.close();
-		
-		//enable the delete button if saved queries exist
-		deleteQuery.setEnabled(!savedQueriesModel.isEmpty());
-	}
-	
-	/**
-	 * Saves the query currently in the text box.
-	 */
-	private void saveQuery()
-	{
-		String savedQuery = queryText.getText();
-		
-		if (savedQuery.length() > 0)
-		{
-			//Find the correct sorted index for the new query to save
-			int index = 0;
-			while (index < savedQueriesModel.getSize() && savedQueriesModel.get(index).compareTo(savedQuery) < 0)
-			{
-				index++;
-			}
-			
-			//If index == size, query will be inserted at the end. Also don't insert duplicate queries.
-			if (index == savedQueriesModel.getSize() || !savedQueriesModel.get(index).equals(savedQuery))
-			{
-				savedQueriesModel.add(index, savedQuery);
-				deleteQuery.setEnabled(true);
-				//Write the queries to the file
-				try
-				{
-					writeSavedQueriesToFile();
-				}
-				catch (IOException ex)
-				{
-					//TODO DEBUG
-					ex.printStackTrace();
-					
-					showErrorMessage("The query could not be saved.");
-					saveQuery.setEnabled(false);
-				}
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(this, "This query has already been saved.", "Save query", JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
-		else
-		{
-			showErrorMessage("Query must not be empty.");
-		}
-	}
-	
-	/**
-	 * Deletes the currently selected saved query
-	 */
-	private void deleteSavedQuery()
-	{
-		savedQueriesModel.remove(savedQueries.getSelectedIndex());
-		
-		//disable the delete button if there are no saved queries
-		if (savedQueriesModel.isEmpty())
-		{
-			deleteQuery.setEnabled(false);
-		}
-		
-		//Update the save file
-		try
-		{
-			writeSavedQueriesToFile();
-		}
-		catch (IOException ex)
-		{
-			//TODO DEBUG
-			ex.printStackTrace();
-			
-			showErrorMessage("The query could not be deleted.");
-			saveQuery.setEnabled(false);
-		}
-	}
-	
-	/**
-	 * Writes the saved queries to the save file 
-	 * 
-	 * @throws FileNotFoundException if the file could not be found
-	 */
-	private void writeSavedQueriesToFile() throws FileNotFoundException
-	{
-		PrintWriter printer = new PrintWriter(savedQueriesFile);
-		
-		for (int i = 0; i < savedQueriesModel.getSize(); i++)
-		{
-			printer.println(savedQueriesModel.get(i));
-		}
-		
-		printer.close();
-	}
-	
 	private class EventListener implements ActionListener, ListSelectionListener
 	{
 		@Override
@@ -459,11 +348,54 @@ public class DatabasePanel extends JPanel
 			}
 			else if (event.getSource() == saveQuery)
 			{
-				saveQuery();
+				if (queryText.getText() != "")
+				{
+					try
+					{
+						if (querySaver.saveQuery(queryText.getText()))
+						{
+							deleteQuery.setEnabled(true);
+						}
+						else
+						{
+							showErrorMessage("This query has already been saved.");
+						}
+					}
+					catch (IOException ex)
+					{
+						//TODO DEBUG
+						ex.printStackTrace();
+						
+						showErrorMessage("The query could not be saved.");
+						saveQuery.setEnabled(false);
+					}
+				}
+				else
+				{
+					showErrorMessage("Query must not be empty.");
+				}
 			}
 			else if (event.getSource() == deleteQuery)
 			{
-				deleteSavedQuery();
+				//Update the save file
+				try
+				{
+					querySaver.deleteSavedQuery(savedQueries.getSelectedIndex());
+
+					//disable the delete button if there are no saved queries left
+					if (savedQueriesModel.isEmpty())
+					{
+						deleteQuery.setEnabled(false);
+					}
+				}
+				catch (IOException ex)
+				{
+					//TODO DEBUG
+					ex.printStackTrace();
+					
+					showErrorMessage("The query could not be deleted.");
+					saveQuery.setEnabled(false);
+				}
 			}
 		}
 
