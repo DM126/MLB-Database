@@ -27,7 +27,9 @@ public class LoginPanel extends JPanel
 		textFields.add(password);
 		textFields.setPreferredSize(new Dimension(username.getPreferredSize().width + 100, username.getPreferredSize().height * 3));
 		
-		login.addActionListener(new ButtonListener());
+		ButtonListener listener = new ButtonListener();
+		login.addActionListener(listener);
+		password.addActionListener(listener);
 		
 		JLabel title = new JLabel("MLB Stats database");
 		title.setFont(new Font("Arial", Font.BOLD, 20));
@@ -94,9 +96,10 @@ public class LoginPanel extends JPanel
 		@Override
 		public void actionPerformed(ActionEvent event)
 		{
-			if (event.getSource() == login)
+			//click login button or press enter on password field
+			if (event.getSource() == login || event.getSource() == password)
 			{
-				connectToDatabase(username.getText(), password.getText());
+				connectToDatabase(username.getText(), new String(password.getPassword()));
 			}
 		}
 		
