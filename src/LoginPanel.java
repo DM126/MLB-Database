@@ -31,7 +31,7 @@ public class LoginPanel extends JPanel
 		login.addActionListener(listener);
 		password.addActionListener(listener);
 		
-		JLabel title = new JLabel("MLB Stats database");
+		JLabel title = new JLabel("MLB Stats Database");
 		title.setFont(new Font("Arial", Font.BOLD, 20));
 		
 		JPanel stuffPanel = new JPanel();
@@ -47,6 +47,11 @@ public class LoginPanel extends JPanel
 		setPreferredSize(new Dimension(stuffPanel.getPreferredSize().width, stuffPanel.getPreferredSize().height + title.getPreferredSize().height + 20));
 	}
 	
+	/**
+	 * Switches to the database panel.
+	 * 
+	 * @param conn the connection to the stats database
+	 */
 	private void openDatabase(Connection conn)
 	{
 		parent.getContentPane().removeAll();

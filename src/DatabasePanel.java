@@ -2,7 +2,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.table.*;
 import java.sql.*;
 
@@ -13,13 +12,11 @@ public class DatabasePanel extends JPanel
 	private JComboBox<String> tableSelect; //Selects which table to display
 	private JTextArea queryText; //Where the user will enter a query
 	private JButton executeQuery;
-	private UpdatableList<String> queryHistory; //Stores the history for the current session
 	private JButton saveQuery;
-	private UpdatableList<String> savedQueries;
+	private ListPanel historyPanel;
+	private SaveableList savedPanel;
 	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
-	private QuerySaver querySaver;
-	private RightClickMenu rightClickMenu; //TODO REFACTOR SAVED QUERY LIST TO ITS OWN CLASS?
 
 	/**
 	 * Sets up the panel by creating the components and  adding them to the 
@@ -47,26 +44,6 @@ public class DatabasePanel extends JPanel
 			//tableScroll.setPreferredSize(new Dimension(1800, 800));
 			//tableScroll.setViewportView(table);
 			
-			//TODO SEPARATE PANELS FOR THE JLISTS AND STUFF?
-			
-			//set up the query history list
-			queryHistory = new UpdatableList<String>(false);
-			JScrollPane historyScroll = new JScrollPane();
-			historyScroll.setPreferredSize(new Dimension(200, 300));
-			historyScroll.setViewportView(queryHistory);
-			
-			//Set up the list of saved queries
-			savedQueries = new UpdatableList<String>(true);
-			JScrollPane savedQueriesScroll = new JScrollPane();
-			savedQueriesScroll.setPreferredSize(new Dimension(200, 300));
-			savedQueriesScroll.setViewportView(savedQueries);
-			
-			querySaver = new QuerySaver(savedQueries);
-			querySaver.loadSavedQueries();
-			
-			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
-			refreshTable("SELECT * FROM people;");
-			
 			queryText = new JTextArea();
 			queryText.setLineWrap(true);
 			JScrollPane queryScroll = new JScrollPane(queryText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -85,9 +62,6 @@ public class DatabasePanel extends JPanel
 			tableSelect.addActionListener(listener);
 			executeQuery.addActionListener(listener);
 			saveQuery.addActionListener(listener);
-			queryHistory.addListSelectionListener(listener);
-			savedQueries.addListSelectionListener(listener);
-			savedQueries.addMouseListener(listener);
 			
 			//TODO FIGURE HOW TO NOT STRETCH ACROSS THE PANEL
 			JPanel optionsPanel = new JPanel();
@@ -97,16 +71,8 @@ public class DatabasePanel extends JPanel
 			optionsPanel.add(executeQuery);
 			optionsPanel.add(saveQuery);
 			
-			JPanel historyPanel = new JPanel();
-			historyPanel.add(new JLabel("History"));
-			historyPanel.add(historyScroll);
-			historyPanel.setPreferredSize(new Dimension(historyScroll.getPreferredSize().width + 10, historyScroll.getPreferredSize().height + 50));
-			
-			JPanel savedPanel = new JPanel();
-			savedPanel.add(new JLabel("Saved queries"));
-			savedPanel.add(savedQueriesScroll);
-			savedPanel.setPreferredSize(new Dimension(savedQueriesScroll.getPreferredSize().width + 10, savedQueriesScroll.getPreferredSize().height + 50));
-			rightClickMenu = new RightClickMenu(listener);
+			historyPanel = new ListPanel(this, "History");
+			savedPanel = new SaveableList(this, "Saved queries");
 			
 			optionsPanel.add(historyPanel);
 			optionsPanel.add(savedPanel);
@@ -122,6 +88,9 @@ public class DatabasePanel extends JPanel
 			setLayout(new BorderLayout());
 			add(optionsPanel, BorderLayout.NORTH);
 			add(tableScroll, BorderLayout.CENTER);
+			
+			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
+			refreshTable("SELECT * FROM people;");
 			
 			//setPreferredSize(new Dimension(tableScroll.getPreferredSize().width + 100, tableScroll.getPreferredSize().height + 100));
 		} 
@@ -211,7 +180,7 @@ public class DatabasePanel extends JPanel
 		table.setModel(model);
 		tableSorter.setModel(model);
 		
-		queryHistory.add(query);
+		historyPanel.add(query);
 	}
 	
 	/**
@@ -219,13 +188,23 @@ public class DatabasePanel extends JPanel
 	 * 
 	 * @param message the message to show.
 	 */
-	private void showErrorMessage(String message)
+	public void showErrorMessage(String message)
 	{
 		JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
 		//System.exit(1);
 	}
 	
-	private class EventListener implements ActionListener, ListSelectionListener, MouseListener
+	/**
+	 * Sets the text of the query text area.
+	 * 
+	 * @param newQuery the new query to write
+	 */
+	public void setQueryText(String newQuery)
+	{
+		queryText.setText(newQuery);
+	}
+	
+	private class EventListener implements ActionListener
 	{
 		@Override
 		public void actionPerformed(ActionEvent event) //ActionListener
@@ -265,7 +244,7 @@ public class DatabasePanel extends JPanel
 				{
 					try
 					{
-						if (!querySaver.saveQuery(queryText.getText()))
+						if (!savedPanel.saveQuery(queryText.getText()))
 						{
 							showErrorMessage("This query has already been saved.");
 						}
@@ -284,84 +263,6 @@ public class DatabasePanel extends JPanel
 					showErrorMessage("Query must not be empty.");
 				}
 			}
-			else if (event.getSource() == rightClickMenu.delete)
-			{
-				//Only delete if a query is currently selected
-				if (!savedQueries.isSelectionEmpty())
-				{
-					try
-					{
-						//Update the save file
-						querySaver.deleteSavedQuery(savedQueries.getSelectedIndex());
-					}
-					catch (IOException ex)
-					{
-						//TODO DEBUG
-						ex.printStackTrace();
-						
-						showErrorMessage("The query could not be deleted.");
-						saveQuery.setEnabled(false);
-					}
-				}
-				else
-				{
-					showErrorMessage("No query is selected.");
-				}
-			}
-		}
-
-		@Override
-		public void valueChanged(ListSelectionEvent event) //ListSelectionListener
-		{
-			if (event.getSource() == queryHistory && !event.getValueIsAdjusting())
-			{
-				queryText.setText(queryHistory.getSelectedValue());
-			}
-			else if (event.getSource() == savedQueries && !event.getValueIsAdjusting())
-			{
-				queryText.setText(savedQueries.getSelectedValue());
-			}
-		}
-
-		@Override
-		public void mousePressed(MouseEvent event) 
-		{
-			//Checks for right click on a saved query
-			if (event.getSource() == savedQueries && event.getButton() == MouseEvent.BUTTON3)
-			{
-				int index = savedQueries.locationToIndex(event.getPoint());
-				if (index >= 0 && savedQueries.getCellBounds(index, index).contains(event.getPoint()))
-				{
-					savedQueries.setSelectedIndex(index);
-					rightClickMenu.show(event.getComponent(), event.getX(), event.getY());
-				}
-			}
-		}
-		
-		//Unused mouselistener methods
-		@Override
-		public void mouseClicked(MouseEvent event) {}
-		@Override
-		public void mouseEntered(MouseEvent event) {}
-		@Override
-		public void mouseExited(MouseEvent event) {}
-		@Override
-		public void mouseReleased(MouseEvent event) {}
-	}
-	
-	/**
-	 * Menu that pops up upon right clicking a saved query in the list
-	 */
-	private class RightClickMenu extends JPopupMenu
-	{
-		private JMenuItem delete;
-		
-		public RightClickMenu(EventListener listener)
-		{
-			delete = new JMenuItem("Delete query");
-			delete.addActionListener(listener);
-			
-			this.add(delete);
 		}
 	}
 }

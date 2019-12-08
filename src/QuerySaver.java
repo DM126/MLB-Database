@@ -10,9 +10,9 @@ public class QuerySaver
 	public static final String SAVED_QUERIES_FILENAME = "savedqueries.txt";
 	
 	private File savedQueriesFile;
-	private UpdatableList<String> savedQueries; //The list of saved queries
+	private SaveableList savedQueries; //The list of saved queries
 	
-	QuerySaver(UpdatableList<String> savedQueries)
+	QuerySaver(SaveableList savedQueries)
 	{
 		this.savedQueries = savedQueries;
 	}
