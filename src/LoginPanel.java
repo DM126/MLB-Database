@@ -9,7 +9,7 @@ public class LoginPanel extends JPanel
 {
 	private JFrame parent;
 	private JTextField username;
-	private JTextField password;
+	private JPasswordField password;
 	private JButton login;
 	
 	public LoginPanel(JFrame parent)
@@ -17,7 +17,7 @@ public class LoginPanel extends JPanel
 		this.parent = parent;
 		
 		username = new JTextField(20);
-		password = new JTextField(20);
+		password = new JPasswordField(20);
 		login = new JButton("Log in");
 		
 		JPanel textFields = new JPanel();
