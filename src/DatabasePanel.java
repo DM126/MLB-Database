@@ -115,17 +115,6 @@ public class DatabasePanel extends JPanel
 			showErrorMessage("Could not load saved queries:\n" + QuerySaver.SAVED_QUERIES_FILENAME + " Could not be found.");
 		}
 	}
-
-	/**
-	 * Connects the program to the database.
-	 * 
-	 * @throws SQLException if the database could not be connected to 
-	 */
-	private void connectToDatabase() throws SQLException//, IOException
-	{		
-			conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/stats?user=postgres&password=password&useSSL=false");
-			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-	}
 	
 	/**
 	 * Creates the combobox where tables can be selected.
