@@ -3,7 +3,7 @@ import javax.swing.*;
 public class Driver
 {
 	/**
-	 * Creates the frame of the GUI and a DatabasePanel
+	 * Creates the frame of the GUI and a login screen.
 	 */
 	public static void main(String[] args)
 	{

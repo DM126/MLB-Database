@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import javax.swing.*;
 
+/**
+ * The screen where the user can log in to postgres.
+ */
 public class LoginPanel extends JPanel
 {
 	private JFrame parent;

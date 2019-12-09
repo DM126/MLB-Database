@@ -4,7 +4,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 /**
- * Panel with a list and title
+ * Panel with a list and title.
+ * Used for the query history.
  */
 public class ListPanel extends JPanel
 {

@@ -5,6 +5,9 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import javax.swing.DefaultListModel;
 
+/**
+ * Saves and loads queries to/from the text file.
+ */
 public class QuerySaver
 {
 	public static final String SAVED_QUERIES_FILENAME = "savedqueries.txt";

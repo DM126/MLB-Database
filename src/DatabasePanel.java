@@ -5,6 +5,9 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.sql.*;
 
+/**
+ * The main screen of the program featuring the database table.
+ */
 public class DatabasePanel extends JPanel
 {	
 	private Connection conn;
