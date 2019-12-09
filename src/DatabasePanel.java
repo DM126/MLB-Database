@@ -47,13 +47,20 @@ public class DatabasePanel extends JPanel
 			queryText = new JTextArea();
 			queryText.setLineWrap(true);
 			JScrollPane queryScroll = new JScrollPane(queryText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-			queryScroll.setPreferredSize(new Dimension(300, 50));
+			queryScroll.setPreferredSize(new Dimension(500, 80));
 			
 			executeQuery = new JButton("Execute Query");
 			executeQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
 			
 			saveQuery = new JButton("Save Query");
 			saveQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
+			
+			JPanel queryPanel = new JPanel();
+			queryPanel.add(new JLabel("Enter a query"));
+			queryPanel.add(queryScroll);
+			queryPanel.add(executeQuery);
+			queryPanel.add(saveQuery);
+			queryPanel.setPreferredSize(new Dimension(queryScroll.getPreferredSize().width + 20, queryScroll.getPreferredSize().height + executeQuery.getPreferredSize().height + 50));
 			
 			createTableComboBox();
 			
@@ -63,22 +70,17 @@ public class DatabasePanel extends JPanel
 			executeQuery.addActionListener(listener);
 			saveQuery.addActionListener(listener);
 			
-			//TODO FIGURE HOW TO NOT STRETCH ACROSS THE PANEL
-			JPanel optionsPanel = new JPanel();
-			//optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-			//optionsPanel.add(Box.createHorizontalStrut(200));
-			optionsPanel.add(queryScroll);
-			optionsPanel.add(executeQuery);
-			optionsPanel.add(saveQuery);
-			
 			historyPanel = new ListPanel(this, "History");
 			savedPanel = new SaveableList(this, "Saved queries");
 			
+			JPanel optionsPanel = new JPanel();
+			optionsPanel.add(queryPanel);
 			optionsPanel.add(historyPanel);
 			optionsPanel.add(savedPanel);
 			
 			optionsPanel.add(new JLabel("Select a table:"));
 			optionsPanel.add(tableSelect);
+			optionsPanel.setPreferredSize(new Dimension(queryPanel.getPreferredSize().width + historyPanel.getPreferredSize().width + savedPanel.getPreferredSize().width + 10, historyPanel.getPreferredSize().height + 10));
 			
 			//JPanel tablePanel = new JPanel();
 			//tablePanel.add(new JLabel("Select a table:"));

@@ -29,7 +29,7 @@ public class ListPanel extends JPanel
 		list.addListSelectionListener(new SelectionListener());
 		
 		JScrollPane scroll = new JScrollPane();
-		scroll.setPreferredSize(new Dimension(200, 300));
+		scroll.setPreferredSize(new Dimension(300, 200));
 		scroll.setViewportView(list);
 		
 		add(new JLabel(title));
