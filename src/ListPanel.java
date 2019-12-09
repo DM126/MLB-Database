@@ -34,7 +34,7 @@ public class ListPanel extends JPanel
 		
 		add(new JLabel(title));
 		add(scroll);
-		setPreferredSize(new Dimension(scroll.getPreferredSize().width + 10, scroll.getPreferredSize().height + 50));
+		setPreferredSize(new Dimension(scroll.getPreferredSize().width + 10, scroll.getPreferredSize().height + 30));
 		
 	}
 	

@@ -77,23 +77,20 @@ public class DatabasePanel extends JPanel
 			optionsPanel.add(historyPanel);
 			optionsPanel.add(savedPanel);
 			
-			optionsPanel.add(new JLabel("Select a table:"));
-			optionsPanel.add(tableSelect);
-			optionsPanel.setPreferredSize(new Dimension(queryPanel.getPreferredSize().width + historyPanel.getPreferredSize().width + savedPanel.getPreferredSize().width + 10, historyPanel.getPreferredSize().height + 10));
+			JPanel tableSelectPanel = new JPanel();
+			tableSelectPanel.add(new JLabel("Select a table:"));
+			tableSelectPanel.add(tableSelect);
+			tableSelectPanel.setPreferredSize(new Dimension(queryPanel.getPreferredSize().width + historyPanel.getPreferredSize().width + savedPanel.getPreferredSize().width + 10, 50));
 			
-			//JPanel tablePanel = new JPanel();
-			//tablePanel.add(new JLabel("Select a table:"));
-			//tablePanel.add(tableSelect);
-			//tablePanel.add(tableScroll);
+			optionsPanel.add(tableSelectPanel);
+			optionsPanel.setPreferredSize(new Dimension(tableSelectPanel.getPreferredSize().width, historyPanel.getPreferredSize().height + tableSelectPanel.getPreferredSize().height + 10));
 			
 			setLayout(new BorderLayout());
 			add(optionsPanel, BorderLayout.NORTH);
 			add(tableScroll, BorderLayout.CENTER);
 			
-			//TODO HAVE USER SELECT TABLE TO BEGIN, OR INPUT QUERY? OR VIEW TABLES?
+			//Populate the table with a sample query
 			refreshTable("SELECT * FROM people;");
-			
-			//setPreferredSize(new Dimension(tableScroll.getPreferredSize().width + 100, tableScroll.getPreferredSize().height + 100));
 		} 
 		catch (SQLException ex)
 		{
