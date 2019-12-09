@@ -55,13 +55,12 @@ public class LoginPanel extends JPanel
 	private void openDatabase(Connection conn)
 	{
 		parent.getContentPane().removeAll();
-		parent.setLayout(new BorderLayout()); //TODO IS THIS NECESSARY?
+		parent.setLayout(new BorderLayout());
 		parent.getContentPane().add(new DatabasePanel(conn), BorderLayout.CENTER);
 		parent.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		parent.setVisible(true);
 	}
 	
-	//TODO DUPLICATE CODE
 	/**
 	 * Displays a dialog box with an error message to the user then exit the program.
 	 * 
@@ -87,11 +86,6 @@ public class LoginPanel extends JPanel
 		}
 		catch (SQLException ex)
 		{
-			//TODO DEBUG
-			System.out.println(ex.getClass());
-			System.out.println(ex.getMessage());
-			ex.printStackTrace();
-			
 			showErrorMessage("Could not connect to the database.\n" + ex.getMessage());
 		}
 	}

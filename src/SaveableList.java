@@ -78,9 +78,6 @@ public class SaveableList extends ListPanel
 				}
 				catch (IOException ex)
 				{
-					//TODO DEBUG
-					ex.printStackTrace();
-					
 					parent.showErrorMessage("The query could not be deleted.");
 				}
 			}

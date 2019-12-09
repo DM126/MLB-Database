@@ -30,8 +30,6 @@ public class DatabasePanel extends JPanel
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			
 			table = new JTable();
-			//table.setPreferredSize(new Dimension(2000, 1000));
-			//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			table.setEnabled(false);
 			
@@ -40,8 +38,6 @@ public class DatabasePanel extends JPanel
 			table.setRowSorter(tableSorter);
 			
 			JScrollPane tableScroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			//tableScroll.setPreferredSize(new Dimension(1800, 800));
-			//tableScroll.setViewportView(table);
 			
 			queryText = new JTextArea();
 			queryText.setLineWrap(true);
@@ -49,10 +45,8 @@ public class DatabasePanel extends JPanel
 			queryScroll.setPreferredSize(new Dimension(500, 80));
 			
 			executeQuery = new JButton("Execute Query");
-			executeQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
 			
 			saveQuery = new JButton("Save Query");
-			saveQuery.setEnabled(true); //TODO SET TO FALSE AND SET TO TRUE WHEN STUFF IS ENTERED
 			
 			JPanel queryPanel = new JPanel();
 			queryPanel.add(new JLabel("Enter a query"));
@@ -94,21 +88,11 @@ public class DatabasePanel extends JPanel
 		} 
 		catch (SQLException ex)
 		{
-			//TODO DEBUG
-			System.out.println(ex.getClass());
-			System.out.println(ex.getMessage());
-			ex.printStackTrace();
-			
 			showErrorMessage("An error was encountered while trying to connect to the database.");
 			System.exit(1);
 		}
 		catch (FileNotFoundException ex)
 		{
-			//TODO DEBUG
-			System.out.println(ex.getClass());
-			System.out.println(ex.getMessage());
-			ex.printStackTrace();
-			
 			saveQuery.setEnabled(false);
 			showErrorMessage("Could not load saved queries:\n" + QuerySaver.SAVED_QUERIES_FILENAME + " Could not be found.");
 		}
@@ -178,7 +162,6 @@ public class DatabasePanel extends JPanel
 	public void showErrorMessage(String message)
 	{
 		JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
-		//System.exit(1);
 	}
 	
 	/**
@@ -218,14 +201,10 @@ public class DatabasePanel extends JPanel
 				}
 				catch (SQLException ex)
 				{
-					//TODO DEBUG
-					ex.printStackTrace();
-					
 					showErrorMessage("There was an error reading the table.\n" + ex.getMessage());
-					System.exit(1);
 				}
 			}
-			else if (event.getSource() == saveQuery)
+			else if (event.getSource() == saveQuery) //button
 			{
 				if (queryText.getText() != "")
 				{
@@ -238,9 +217,6 @@ public class DatabasePanel extends JPanel
 					}
 					catch (IOException ex)
 					{
-						//TODO DEBUG
-						ex.printStackTrace();
-						
 						showErrorMessage("The query could not be saved.");
 						saveQuery.setEnabled(false);
 					}
