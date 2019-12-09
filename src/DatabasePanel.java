@@ -7,26 +7,25 @@ import java.sql.*;
 
 public class DatabasePanel extends JPanel
 {	
-	private Connection conn = null;
+	private Connection conn;
 	private Statement stmt;
 	private JComboBox<String> tableSelect; //Selects which table to display
 	private JTextArea queryText; //Where the user will enter a query
 	private JButton executeQuery;
 	private JButton saveQuery;
-	private ListPanel historyPanel;
-	private SaveableList savedPanel;
+	private ListPanel historyPanel; //List of query history
+	private SaveableList savedPanel; //List of saved queries
 	private TableRowSorter<TableModel> tableSorter;
 	private JTable table;
 
 	/**
-	 * Sets up the panel by creating the components and  adding them to the 
+	 * Sets up the panel by creating the components and adding them to the 
 	 * panel.
 	 */
 	public DatabasePanel(Connection conn)
 	{
 		try
 		{
-			//connectToDatabase();
 			this.conn = conn;
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			
