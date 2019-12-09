@@ -12,7 +12,7 @@ For details see: http://creativecommons.org/licenses/by-sa/3.0/
 <br><br>
 ### Setup Instructions
 * In postgres, create a new database called stats
-* Import the sql files from the linked GitHub repository into the stats database
+* Follow the instructions in the linked github repository to import the data into the stats database
 * Download the PostgreSQL JDBC driver [here](https://jdbc.postgresql.org/download.html) and add it to the build path
 * Compile the program
 <br><br>
