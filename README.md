@@ -20,3 +20,4 @@ For details see: http://creativecommons.org/licenses/by-sa/3.0/
 * The program requires logging in as a postgres user
 * Once logged in, you will be taken to the database screen
 * There, you can execute queries, view your query history, save a query, or select a specific table to view
+* The table can be sorted by double clicking on the column headers
